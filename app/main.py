@@ -13,8 +13,8 @@ import httpx
 load_dotenv()
 
 # Create necessary directories
-os.makedirs(os.getenv("UPLOAD_FOLDER"), exist_ok=True)
-os.makedirs(os.getenv("VECTOR_STORE_PATH"), exist_ok=True)
+os.makedirs(os.getenv("UPLOAD_FOLDER", "./data/uploads"), exist_ok=True)
+os.makedirs(os.getenv("VECTOR_STORE_PATH", "./data/vector_store"), exist_ok=True)
 
 # Import database initialization function
 from app.db.database import init_db
