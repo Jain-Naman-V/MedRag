@@ -144,37 +144,3 @@ yarl==1.20.1
 zipp==3.23.0
 zopfli==0.2.3.post1
 zstandard==0.23.0
-
-"""
-# Core
-fastapi>=0.95.0
-uvicorn>=0.21.1
-python-multipart>=0.0.6
-python-dotenv>=1.0.0
-
-# PDF Processing
-PyMuPDF>=1.21.0; sys_platform != 'win32'
-PyMuPDF>=1.21.0,<2.0.0; sys_platform == 'win32' and platform_machine == 'AMD64'
-PyMuPDF>=1.21.0,<2.0.0; sys_platform == 'win32' and platform_machine == 'x86_64'
-
-# AI/ML
-openai>=1.0.0
-langchain>=0.0.200
-faiss-cpu>=1.7.0; sys_platform != 'darwin' or platform_machine != 'arm64'
-chromadb>=0.4.0
-
-# Security
-pydantic>=2.0.0
-python-jose[cryptography]>=3.3.0
-passlib[bcrypt]>=1.7.4
-
-# Utilities
-weasyprint>=59.0
-pytest>=7.0.0
-httpx>=0.24.0
-
-# Alternative PDF processors (fallback)
-pdfplumber>=0.9.0
-PyPDF2>=3.0.0
-Pillow>=9.0.0  # For image processing, often a dependency for vision tasks
-"""
