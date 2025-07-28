@@ -96,14 +96,13 @@ class DocumentSummarizer:
     Summarizes and analyzes medical documents. Uses RAG (vector store) if available, otherwise falls back to full OCR-extracted text.
     Vector store is optional and not required for default summarization flow.
     """
-    def __init__(self, openai_api_key: Optional[str] = None, vector_store_path: Optional[str] = None):
-        load_dotenv()
-        self.openai_api_key = openai_api_key or os.getenv("OPENAI_API_KEY")
+    def __init__(self, openai_api_key: str, vector_store_path: Optional[str] = None):
+        if not openai_api_key:
+            logger.error("OpenAI API key not provided.")
+            raise ValueError("OpenAI API key is required.")
+        self.openai_api_key = openai_api_key
         self.vector_store_path = vector_store_path or os.getenv("VECTOR_STORE_PATH", "./data/vector_store_default")
 
-        if not self.openai_api_key:
-            logger.error("OpenAI API key not found.")
-            raise ValueError("OpenAI API key is required.")
         # Vector store is now optional; only warn if missing
         if not self.vector_store_path or not Path(self.vector_store_path).exists():
             logger.warning(f"Vector store path not found or does not exist: {self.vector_store_path}. RAG will be skipped; using full extracted text for summarization.")
