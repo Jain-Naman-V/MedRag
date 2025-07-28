@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 text-center mb-4">
+        <h1 class="display-4">MedRAG Patient History RAG</h1>
+        <p class="lead">Upload, analyze, and query medical documents with ease</p>
+    </div>
+</div>
+
+<!-- OpenAI API Key Configuration Section -->
+<div class="row mb-4">
+    <div class="col-md-8 mx-auto">
+        <div class="card shadow-sm border-primary api-key-card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-key me-2"></i>OpenAI API Configuration</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="openai-api-key" class="form-label">OpenAI API Key</label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="openai-api-key" 
+                               placeholder="Enter your OpenAI API key (sk-...)" 
+                               value="">
+                        <button class="btn btn-outline-secondary" type="button" id="toggle-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="form-text">Your API key is required for AI-powered document analysis and summarization.</div>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-primary" id="test-api-key">
+                        <i class="fas fa-check me-2"></i>Test & Save API Key
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" id="clear-api-key">
+                        <i class="fas fa-trash me-2"></i>Clear
+                    </button>
+                </div>
+                <div id="api-status" class="mt-3" style="display: none;">
+                    <div id="api-success" class="alert alert-success" style="display: none;">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <strong>Success!</strong> API key configured successfully.
+                    </div>
+                    <div id="api-error" class="alert alert-danger" style="display: none;">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <strong>Error!</strong> <span id="error-message">Invalid API key. Please check and try again.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body text-center">
+                <i class="fas fa-file-upload fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">Upload Documents</h5>
+                <p class="card-text">Upload patient medical records, history, and other documents for analysis.</p>
+                <a href="/documents" class="btn btn-primary">Upload Now</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body text-center">
+                <i class="fas fa-search fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">Query Information</h5>
+                <p class="card-text">Ask questions about your documents to extract relevant medical information.</p>
+                <a href="/query" class="btn btn-primary">Start Querying</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body text-center">
+                <i class="fas fa-list-alt fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">View Documents</h5>
+                <p class="card-text">Browse and manage your uploaded medical documents.</p>
+                <a href="/documents" class="btn btn-primary">View Library</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">About MedRAG RAG</h5>
+            </div>
+            <div class="card-body">
+                <p>MedRAG RAG (Retrieval Augmented Generation) is a powerful tool designed to help healthcare professionals extract and analyze information from patient medical records and documents.</p>
+                <p>Our system uses advanced natural language processing to:</p>
+                <ul>
+                    <li>Extract key medical information from uploaded documents</li>
+                    <li>Answer specific questions about patient history</li>
+                    <li>Summarize important findings and medical data</li>
+                    <li>Provide quick access to relevant information across multiple documents</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const apiKeyInput = document.getElementById('openai-api-key');
+    const testButton = document.getElementById('test-api-key');
+    const clearButton = document.getElementById('clear-api-key');
+    const togglePassword = document.getElementById('toggle-password');
+    const apiStatus = document.getElementById('api-status');
+    const apiSuccess = document.getElementById('api-success');
+    const apiError = document.getElementById('api-error');
+    const errorMessage = document.getElementById('error-message');
+
+    // Toggle password visibility
+    togglePassword.addEventListener('click', function() {
+        const type = apiKeyInput.type === 'password' ? 'text' : 'password';
+        apiKeyInput.type = type;
+        togglePassword.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+    });
+
+    // Test API key
+    testButton.addEventListener('click', async function() {
+        const apiKey = apiKeyInput.value.trim();
+        
+        if (!apiKey) {
+            showError('Please enter an API key');
+            return;
+        }
+
+        if (!apiKey.startsWith('sk-')) {
+            showError('API key should start with "sk-"');
+            return;
+        }
+
+        // Show loading state
+        testButton.disabled = true;
+        testButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Testing...';
+
+        try {
+            const response = await fetch('/api/test-openai-key', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ api_key: apiKey })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                showSuccess();
+                // Store in session storage for persistence
+                sessionStorage.setItem('openai_api_key', apiKey);
+            } else {
+                showError(result.detail || 'Invalid API key. Please check and try again.');
+            }
+        } catch (error) {
+            showError('Network error. Please check your connection and try again.');
+        } finally {
+            // Reset button state
+            testButton.disabled = false;
+            testButton.innerHTML = '<i class="fas fa-check me-2"></i>Test & Save API Key';
+        }
+    });
+
+    // Clear API key
+    clearButton.addEventListener('click', function() {
+        apiKeyInput.value = '';
+        sessionStorage.removeItem('openai_api_key');
+        hideStatus();
+    });
+
+    // Load API key from session storage on page load
+    const savedApiKey = sessionStorage.getItem('openai_api_key');
+    if (savedApiKey) {
+        apiKeyInput.value = savedApiKey;
+    }
+
+    function showSuccess() {
+        apiSuccess.style.display = 'block';
+        apiError.style.display = 'none';
+        apiStatus.style.display = 'block';
+        apiKeyInput.classList.add('is-valid');
+        apiKeyInput.classList.remove('is-invalid');
+    }
+
+    function showError(message) {
+        errorMessage.textContent = message;
+        apiError.style.display = 'block';
+        apiSuccess.style.display = 'none';
+        apiStatus.style.display = 'block';
+        apiKeyInput.classList.add('is-invalid');
+        apiKeyInput.classList.remove('is-valid');
+    }
+
+    function hideStatus() {
+        apiStatus.style.display = 'none';
+        apiKeyInput.classList.remove('is-valid', 'is-invalid');
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2><i class="fas fa-search me-2"></i>Query Medical Documents</h2>
+        <p class="text-muted">Ask questions about patient documents to retrieve relevant information</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-question-circle me-2"></i>Ask a Question</h5>
+            </div>
+            <div class="card-body">
+                <form id="query-form">
+                    <div class="mb-3">
+                        <label for="patient-filter" class="form-label">Filter by Patient ID (optional)</label>
+                        <select class="form-select" id="patient-filter" name="patient_id">
+                            <option value="">All Patients</option>
+                            <!-- Will be populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="query-input" class="form-label">Your Question</label>
+                        <textarea class="form-control" id="query-input" name="query" rows="3" placeholder="E.g., What medications is the patient currently taking?" required></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="query-type" class="form-label">Query Type</label>
+                            <select class="form-select" id="query-type" name="query_type">
+                                <option value="rag">RAG (Retrieval Augmented Generation)</option>
+                                <option value="summary">Generate Summary</option>
+                                <option value="extract">Extract Key Information</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="response-length" class="form-label">Response Length</label>
+                            <select class="form-select" id="response-length" name="response_length">
+                                <option value="concise">Concise</option>
+                                <option value="detailed" selected>Detailed</option>
+                                <option value="comprehensive">Comprehensive</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary" id="query-btn">
+                            <i class="fas fa-search me-2"></i>Submit Query
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow-sm d-none" id="results-card">
+            <div class="card-header bg-light">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Results</h5>
+                    <button class="btn btn-sm btn-outline-secondary" id="copy-results-btn">
+                        <i class="fas fa-copy me-1"></i>Copy
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="text-center py-4" id="query-loading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Processing your query...</p>
+                </div>
+                <div id="query-results" class="d-none">
+                    <div class="mb-4">
+                        <h6>Your Question:</h6>
+                        <p id="result-question" class="bg-light p-3 rounded"></p>
+                    </div>
+                    <div class="mb-4">
+                        <h6>Answer:</h6>
+                        <div id="result-answer" class="bg-light p-3 rounded"></div>
+                    </div>
+                    <div class="mb-4">
+                        <h6>Sources:</h6>
+                        <div id="result-sources">
+                            <p class="text-muted">No source documents referenced.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="alert alert-danger d-none" id="query-error">
+                    Error processing your query. Please try again.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Query History Section -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Queries</h5>
+            </div>
+            <div class="card-body">
+                <div id="history-container">
+                    <div class="text-center py-3" id="history-loading">
+                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <span class="ms-2">Loading query history...</span>
+                    </div>
+                    <div id="query-history-list"></div>
+                    <div class="text-center py-3 d-none" id="no-history">
+                        <p class="text-muted">No previous queries found.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // This will be replaced by the main.js file
+</script>
+{% endblock %}

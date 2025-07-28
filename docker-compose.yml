@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - ./data/uploads:/app/data/uploads
+      - ./data/vector_store:/app/data/vector_store
+    environment:
+      - APP_ENV=production
+      - DEBUG=False
+      - HOST=0.0.0.0
+      - PORT=8000
+      - MAX_UPLOAD_SIZE=10485760
+      - ALLOWED_EXTENSIONS=pdf
+      - UPLOAD_FOLDER=/app/data/uploads
+      - VECTOR_STORE_PATH=/app/data/vector_store
+      # Uncomment and set these variables in a .env file
+      # - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # - HUGGINGFACEHUB_API_TOKEN=${HUGGINGFACEHUB_API_TOKEN}
+    restart: unless-stopped
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+  # Uncomment to add a frontend service
+  # frontend:
+  #   build: ./frontend
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - ./frontend:/app
+  #     - /app/node_modules
+  #   environment:
+  #     - NODE_ENV=development
+  #     - REACT_APP_API_URL=http://localhost:8000
+  #   depends_on:
+  #     - web
+
+  # Uncomment to add a database service
+  # db:
+  #   image: postgres:13
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data/
+  #   environment:
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=postgres
+  #     - POSTGRES_DB=medagg
+  #   ports:
+  #     - "5432:5432"
+
+
+# Uncomment if using a database
+# volumes:
+#   postgres_data:
